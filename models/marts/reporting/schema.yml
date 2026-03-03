@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: rpt_inpatient_year_summary
+    description: "Year level summary for inpatient charges."
+
+  - name: rpt_outpatient_year_summary
+    description: "Year level summary for outpatient charges."

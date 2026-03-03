@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: cms_raw
+    database: CMS_POC
+    schema: RAW
+    tables:
+      - name: INPATIENT_CHARGES_RAW
+        description: "CMS inpatient charges raw data (2011-2015)"
+      - name: OUTPATIENT_CHARGES_RAW
+        description: "CMS outpatient charges raw data (2011-2015)"

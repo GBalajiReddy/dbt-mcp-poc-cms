@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: fct_outpatient_charges
+    columns:
+      - name: average_medicare_payments
+        tests:
+          - not_null:
+              config:
+                severity: warn
