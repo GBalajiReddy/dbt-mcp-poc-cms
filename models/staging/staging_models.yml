@@ -1,0 +1,7 @@
+version: 2
+
+models:
+  - name: stg_inpatient_charges
+    description: "Cleaned staging view for inpatient charges raw"
+  - name: stg_outpatient_charges
+    description: "Cleaned staging view for outpatient charges raw"

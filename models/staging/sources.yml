@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: cms_raw
+    database: CMS_POC
+    schema: RAW
+    tables:
+      - name: inpatient_charges_raw
+      - name: outpatient_charges_raw
+      - name: physicians_and_other_supplier_raw
+      - name: nursing_facilities_raw

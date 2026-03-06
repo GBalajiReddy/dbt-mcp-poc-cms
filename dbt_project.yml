@@ -21,10 +21,20 @@ models:
     staging:
       +materialized: view
       +schema: STAGING
+
     marts:
       dimensions:
         +materialized: table
         +schema: MART
+        
       facts:
         +materialized: table
         +schema: MART
+
+      reporting:
+        +schema: MART
+        +materialized: view
+
+      semantic:
+        +schema: MART
+        +materialized: table

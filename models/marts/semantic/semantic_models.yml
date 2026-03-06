@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: time_spine_daily
+    description: Daily time spine for MetricFlow semantic layer.
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        granularity: day
+
+metrics:
+  - name: inpatient_to_outpatient_avg_payment_ratio
+    label: Inpatient to Outpatient Avg Payment Ratio
+    description: Ratio of inpatient average total payments to outpatient average total payments.
+    type: ratio
+    numerator: inpatient_avg_total_payments
+    denominator: outpatient_avg_total_payments
+
+  - name: inpatient_vs_outpatient_payment_gap
+    label: Inpatient vs Outpatient Payment Gap
+    description: Difference between inpatient and outpatient average total payments.
+    type: derived
+    expr: inpatient_payment - outpatient_payment
+    input_metrics:
+      - name: inpatient_avg_total_payments
+        alias: inpatient_payment
+      - name: outpatient_avg_total_payments
+        alias: outpatient_payment
