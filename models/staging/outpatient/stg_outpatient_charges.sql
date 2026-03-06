@@ -26,4 +26,4 @@ select
 
   source_file,
   batch_id
-from {{ source('cms_raw', 'OUTPATIENT_CHARGES_RAW') }}
+from {{ source('cms_raw', 'outpatient_charges_raw') }}
