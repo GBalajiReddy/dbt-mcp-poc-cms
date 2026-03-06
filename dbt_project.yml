@@ -34,3 +34,7 @@ models:
       reporting:
         +schema: MART
         +materialized: view
+
+      semantic:
+        +schema: MART
+        +materialized: table

@@ -1,234 +1,29 @@
 version: 2
 
-semantic_models:
-  - name: outpatient_charges
-    description: Outpatient charges fact semantic model (built from fct_outpatient_charges).
-    model: ref('fct_outpatient_charges')
-
-    defaults:
-      agg_time_dimension: data_year
-
-    entities:
-      - name: outpatient_fact
-        type: primary
-        expr: outpatient_fact_key
-
-      - name: provider
-        type: foreign
-        expr: provider_key
-
-      - name: apc
-        type: foreign
-        expr: apc_key
-
-    dimensions:
-      - name: data_year
-        type: categorical
-        expr: data_year
-
-    measures:
-      - name: outpatient_services
-        description: Total outpatient services.
-        agg: sum
-        expr: outpatient_services
-
-      - name: avg_estimated_submitted_charges
-        description: Average estimated submitted charges.
-        agg: avg
-        expr: average_estimated_submitted_charges
-
-      - name: avg_total_payments
-        description: Average total payments.
-        agg: avg
-        expr: average_total_payments
-
-      # NOTE:
-      # We intentionally removed outpatient avg_medicare_payments measure from semantic layer
-      # because the source does not provide it (always NULL currently). Column can remain in model.
-
-      - name: outpatient_rows
-        description: Row count of outpatient fact.
-        agg: count
-        expr: outpatient_fact_key
-
-  - name: inpatient_charges
-    description: Inpatient charges fact semantic model (built from fct_inpatient_charges).
-    model: ref('fct_inpatient_charges')
-
-    defaults:
-      agg_time_dimension: data_year
-
-    entities:
-      - name: inpatient_fact
-        type: primary
-        expr: inpatient_fact_key
-
-      - name: provider
-        type: foreign
-        expr: provider_key
-
-      - name: drg
-        type: foreign
-        expr: drg_key
-
-    dimensions:
-      - name: data_year
-        type: categorical
-        expr: data_year
-
-    measures:
-      - name: total_discharges
-        description: Total discharges.
-        agg: sum
-        expr: total_discharges
-
-      - name: avg_covered_charges
-        description: Average covered charges.
-        agg: avg
-        expr: average_covered_charges
-
-      - name: avg_total_payments
-        description: Average total payments.
-        agg: avg
-        expr: average_total_payments
-
-      - name: avg_medicare_payments
-        description: Average Medicare payments.
-        agg: avg
-        expr: average_medicare_payments
-
-      - name: inpatient_rows
-        description: Row count of inpatient fact.
-        agg: count
-        expr: inpatient_fact_key
-
-  - name: yearly_summary
-    description: Combined yearly summary across inpatient and outpatient.
-    model: ref('rpt_yearly_summary')
-
-    defaults:
-      agg_time_dimension: data_year
-
-    entities:
-      - name: yearly_summary
-        type: primary
-        expr: data_year
-
-    dimensions:
-      - name: data_year
-        type: categorical
-        expr: data_year
-
-      - name: service_type
-        type: categorical
-        expr: service_type
-
-    measures:
-      - name: total_discharges
-        agg: sum
-        expr: total_discharges
-
-      - name: outpatient_services
-        agg: sum
-        expr: outpatient_services
-
-      - name: avg_total_payments
-        agg: avg
-        expr: avg_total_payments
-
-      - name: avg_medicare_payments
-        agg: avg
-        expr: avg_medicare_payments
+models:
+  - name: time_spine_daily
+    description: Daily time spine for MetricFlow semantic layer.
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        granularity: day
 
 metrics:
-  # -------------------
-  # OUTPATIENT METRICS
-  # -------------------
-  - name: outpatient_total_services
-    description: Total outpatient services.
-    type: simple
-    label: Outpatient Total Services
-    type_params:
-      measure: outpatient_services
+  - name: inpatient_to_outpatient_avg_payment_ratio
+    label: Inpatient to Outpatient Avg Payment Ratio
+    description: Ratio of inpatient average total payments to outpatient average total payments.
+    type: ratio
+    numerator: inpatient_avg_total_payments
+    denominator: outpatient_avg_total_payments
 
-  - name: outpatient_avg_estimated_submitted_charges
-    description: Avg estimated submitted charges.
-    type: simple
-    label: Outpatient Avg Estimated Submitted Charges
-    type_params:
-      measure: avg_estimated_submitted_charges
-
-  - name: outpatient_avg_total_payments
-    description: Avg total payments (outpatient).
-    type: simple
-    label: Outpatient Avg Total Payments
-    type_params:
-      measure: avg_total_payments
-
-  - name: outpatient_row_count
-    description: Row count of outpatient fact.
-    type: simple
-    label: Outpatient Row Count
-    type_params:
-      measure: outpatient_rows
-
-  # ------------------
-  # INPATIENT METRICS
-  # ------------------
-  - name: inpatient_total_discharges
-    description: Total inpatient discharges.
-    type: simple
-    label: Inpatient Total Discharges
-    type_params:
-      measure: total_discharges
-
-  - name: inpatient_avg_covered_charges
-    description: Avg covered charges (inpatient).
-    type: simple
-    label: Inpatient Avg Covered Charges
-    type_params:
-      measure: avg_covered_charges
-
-  - name: inpatient_avg_total_payments
-    description: Avg total pa1yments (inpatient).
-    type: simple
-    label: Inpatient Avg Total Payments
-    type_params:
-      measure: avg_total_payments
-
-  - name: inpatient_avg_medicare_payments
-    description: Avg medicare payments (inpatient).
-    type: simple
-    label: Inpatient Avg Medicare Payments
-    type_params:
-      measure: avg_medicare_payments
-
-  - name: inpatient_row_count
-    description: Row count of inpatient fact.
-    type: simple
-    label: Inpatient Row Count
-    type_params:
-      measure: inpatient_rows
-
-  # -------------------------
-  # CROSS FACT METRICS
-  # -------------------------
-  - name: inpatient_vs_outpatient_payment_ratio
-    description: Ratio of inpatient avg total payments to outpatient avg total payments.
+  - name: inpatient_vs_outpatient_payment_gap
+    label: Inpatient vs Outpatient Payment Gap
+    description: Difference between inpatient and outpatient average total payments.
     type: derived
-    label: Inpatient vs Outpatient Payment Ratio
-    type_params:
-      expr: inpatient_avg_total_payments / outpatient_avg_total_payments
-      metrics:
-        - name: inpatient_avg_total_payments
-        - name: outpatient_avg_total_payments
-
-  - name: inpatient_vs_outpatient_payment_difference
-    description: Difference between inpatient and outpatient avg total payments.
-    type: derived
-    label: Inpatient vs Outpatient Payment Difference
-    type_params:
-      expr: inpatient_avg_total_payments - outpatient_avg_total_payments
-      metrics:
-        - name: inpatient_avg_total_payments
-        - name: outpatient_avg_total_payments
+    expr: inpatient_payment - outpatient_payment
+    input_metrics:
+      - name: inpatient_avg_total_payments
+        alias: inpatient_payment
+      - name: outpatient_avg_total_payments
+        alias: outpatient_payment

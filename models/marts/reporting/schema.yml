@@ -2,7 +2,138 @@ version: 2
 
 models:
   - name: rpt_inpatient_year_summary
-    description: "Year level summary for inpatient charges."
+    description: Year-level inpatient executive summary for semantic querying.
+    semantic_model:
+      enabled: true
+      name: inpatient_yearly_summary
+    agg_time_dimension: metric_year
+    columns:
+      - name: data_year
+        description: Calendar year of reporting.
+        entity:
+          name: inpatient_report_year
+          type: primary
+
+      - name: metric_year
+        description: First day of the reporting year for semantic time analysis.
+        dimension:
+          type: time
+        granularity: year
+
+      - name: total_discharges
+        description: Total inpatient discharges in the year.
+
+      - name: avg_covered_charges
+        description: Weighted average inpatient covered charges.
+
+      - name: avg_total_payments
+        description: Weighted average inpatient total payments.
+
+      - name: avg_medicare_payments
+        description: Weighted average inpatient Medicare payments.
+
+    metrics:
+      - name: inpatient_total_discharges
+        label: Inpatient Total Discharges
+        description: Total inpatient discharges by year.
+        type: simple
+        agg: sum
+        expr: total_discharges
+
+      - name: inpatient_avg_covered_charges
+        label: Inpatient Avg Covered Charges
+        description: Annual weighted inpatient average covered charges.
+        type: simple
+        agg: average
+        expr: avg_covered_charges
+
+      - name: inpatient_avg_total_payments
+        label: Inpatient Avg Total Payments
+        description: Annual weighted inpatient average total payments.
+        type: simple
+        agg: average
+        expr: avg_total_payments
+
+      - name: inpatient_avg_medicare_payments
+        label: Inpatient Avg Medicare Payments
+        description: Annual weighted inpatient average Medicare payments.
+        type: simple
+        agg: average
+        expr: avg_medicare_payments
+
+      - name: inpatient_row_count
+        label: Inpatient Row Count
+        description: Count of inpatient yearly summary rows.
+        type: simple
+        agg: count
+        expr: data_year
 
   - name: rpt_outpatient_year_summary
-    description: "Year level summary for outpatient charges."
+    description: Year-level outpatient executive summary for semantic querying.
+    semantic_model:
+      enabled: true
+      name: outpatient_yearly_summary
+    agg_time_dimension: metric_year
+    columns:
+      - name: data_year
+        description: Calendar year of reporting.
+        entity:
+          name: outpatient_report_year
+          type: primary
+
+      - name: metric_year
+        description: First day of the reporting year for semantic time analysis.
+        dimension:
+          type: time
+        granularity: year
+
+      - name: total_outpatient_services
+        description: Total outpatient services in the year.
+
+      - name: avg_estimated_submitted_charges
+        description: Weighted average outpatient estimated submitted charges.
+
+      - name: avg_total_payments
+        description: Weighted average outpatient total payments.
+
+      - name: avg_medicare_payments
+        description: Weighted average outpatient Medicare payments.
+
+    metrics:
+      - name: outpatient_total_services
+        label: Outpatient Total Services
+        description: Total outpatient services by year.
+        type: simple
+        agg: sum
+        expr: total_outpatient_services
+
+      - name: outpatient_avg_estimated_submitted_charges
+        label: Outpatient Avg Estimated Submitted Charges
+        description: Annual weighted outpatient average estimated submitted charges.
+        type: simple
+        agg: average
+        expr: avg_estimated_submitted_charges
+
+      - name: outpatient_avg_total_payments
+        label: Outpatient Avg Total Payments
+        description: Annual weighted outpatient average total payments.
+        type: simple
+        agg: average
+        expr: avg_total_payments
+
+      - name: outpatient_avg_medicare_payments
+        label: Outpatient Avg Medicare Payments
+        description: Annual weighted outpatient average Medicare payments.
+        type: simple
+        agg: average
+        expr: avg_medicare_payments
+
+      - name: outpatient_row_count
+        label: Outpatient Row Count
+        description: Count of outpatient yearly summary rows.
+        type: simple
+        agg: count
+        expr: data_year
+
+  - name: rpt_yearly_summary
+    description: Combined yearly summary across inpatient and outpatient.

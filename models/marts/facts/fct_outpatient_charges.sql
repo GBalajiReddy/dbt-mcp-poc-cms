@@ -22,10 +22,48 @@ with src as (
 
 ),
 
-final as (
+provider_dedup as (
 
     select
-        -- Surrogate Fact Key (stable, based only on grain columns)
+        provider_id,
+        provider_key
+    from (
+        select
+            provider_id,
+            provider_key,
+            row_number() over (
+                partition by provider_id, provider_source
+                order by provider_name
+            ) as rn
+        from {{ ref('dim_provider') }}
+        where provider_source = 'HOSPITAL_OUTPATIENT'
+    )
+    where rn = 1
+
+),
+
+apc_dedup as (
+
+    select
+        apc_full_definition,
+        apc_key
+    from (
+        select
+            apc_full_definition,
+            apc_key,
+            row_number() over (
+                partition by apc_full_definition
+                order by apc_code
+            ) as rn
+        from {{ ref('dim_apc') }}
+    )
+    where rn = 1
+
+),
+
+final as (
+
+    select distinct
         {{ dbt_utils.generate_surrogate_key([
             's.data_year',
             's.provider_id',
@@ -33,7 +71,7 @@ final as (
             's.source_file'
         ]) }} as outpatient_fact_key,
 
-        -- Grain columns
+        -- Grain
         s.data_year,
 
         -- Dimension Keys
@@ -46,14 +84,16 @@ final as (
         s.average_total_payments,
         s.average_medicare_payments,
 
-        -- Lineage / Audit
+        -- Audit
         s.source_file,
         s.batch_id
 
     from src s
-    left join {{ ref('dim_provider') }} p
+
+    left join provider_dedup p
       on s.provider_id = p.provider_id
-    left join {{ ref('dim_apc') }} a
+
+    left join apc_dedup a
       on s.apc = a.apc_full_definition
 
 )

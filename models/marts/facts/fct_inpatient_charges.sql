@@ -13,7 +13,6 @@ with src as (
     from {{ ref('stg_inpatient_charges') }} s
 
     {% if is_incremental() %}
-      -- Only process newly arrived files (fast + reliable)
       where not exists (
         select 1
         from {{ this }} t
@@ -27,7 +26,6 @@ final as (
 
     select
 
-        -- Surrogate Fact Key (unique per provider + drg + year + source_file)
         {{ dbt_utils.generate_surrogate_key([
             's.provider_id',
             's.drg_definition',
@@ -35,7 +33,7 @@ final as (
             's.source_file'
         ]) }} as inpatient_fact_key,
 
-        -- Grain columns
+        -- Grain
         s.data_year,
 
         -- Dimension Keys
@@ -53,10 +51,12 @@ final as (
         s.batch_id
 
     from src s
+
     left join {{ ref('dim_provider') }} p
-      on s.provider_id = p.provider_id
+        on s.provider_id = p.provider_id
+
     left join {{ ref('dim_drg') }} d
-      on s.drg_definition = d.drg_definition
+        on s.drg_definition = d.drg_definition
 
 )
 
