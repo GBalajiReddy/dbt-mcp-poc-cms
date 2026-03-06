@@ -190,7 +190,7 @@ metrics:
       measure: avg_covered_charges
 
   - name: inpatient_avg_total_payments
-    description: Avg total payments (inpatient).
+    description: Avg total pa1yments (inpatient).
     type: simple
     label: Inpatient Avg Total Payments
     type_params:

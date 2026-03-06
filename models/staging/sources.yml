@@ -5,7 +5,7 @@ sources:
     database: CMS_POC
     schema: RAW
     tables:
-      - name: INPATIENT_CHARGES_RAW
-        description: "CMS inpatient charges raw data (2011-2015)"
-      - name: OUTPATIENT_CHARGES_RAW
-        description: "CMS outpatient charges raw data (2011-2015)"
+      - name: inpatient_charges_raw
+      - name: outpatient_charges_raw
+      - name: physicians_and_other_supplier_raw
+      - name: nursing_facilities_raw
