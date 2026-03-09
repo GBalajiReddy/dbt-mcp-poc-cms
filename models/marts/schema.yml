@@ -1,10 +1,315 @@
 version: 2
 
 models:
-  - name: fct_outpatient_charges
+  - name: dim_provider
+    description: Provider dimension for provider-level and state-level analysis.
+    semantic_model:
+      enabled: true
+      name: provider_dim
     columns:
+      - name: provider_key
+        description: Surrogate key for provider dimension.
+        entity:
+          name: provider
+          type: primary
+        tests:
+          - not_null
+          - unique
+
+      - name: provider_id
+        description: Source provider identifier.
+        dimension:
+          type: categorical
+
+      - name: provider_name
+        description: Provider name.
+        dimension:
+          type: categorical
+
+      - name: provider_city
+        description: Provider city.
+        dimension:
+          type: categorical
+
+      - name: provider_state
+        description: Provider state.
+        dimension:
+          type: categorical
+
+      - name: provider_zipcode
+        description: Provider ZIP code.
+        dimension:
+          type: categorical
+
+      - name: provider_street_address
+        description: Provider street address.
+        dimension:
+          type: categorical
+
+      - name: provider_type
+        description: Provider type.
+        dimension:
+          type: categorical
+
+      - name: provider_source
+        description: Provider source classification.
+        dimension:
+          type: categorical
+
+  - name: dim_drg
+    description: DRG dimension for inpatient service-line analysis.
+    semantic_model:
+      enabled: true
+      name: drg_dim
+    columns:
+      - name: drg_key
+        description: Surrogate key for DRG dimension.
+        entity:
+          name: drg
+          type: primary
+        tests:
+          - not_null
+          - unique
+
+      - name: drg_code
+        description: DRG code.
+        dimension:
+          type: categorical
+
+      - name: drg_description
+        description: DRG description.
+        dimension:
+          type: categorical
+
+      - name: drg_definition
+        description: Full DRG definition.
+        dimension:
+          type: categorical
+
+  - name: dim_apc
+    description: APC dimension for outpatient service-line analysis.
+    semantic_model:
+      enabled: true
+      name: apc_dim
+    columns:
+      - name: apc_key
+        description: Surrogate key for APC dimension.
+        entity:
+          name: apc
+          type: primary
+        tests:
+          - not_null
+          - unique
+
+      - name: apc_code
+        description: APC code.
+        dimension:
+          type: categorical
+
+      - name: apc_description
+        description: APC description.
+        dimension:
+          type: categorical
+
+      - name: apc_full_definition
+        description: Full APC definition.
+        dimension:
+          type: categorical
+
+  - name: fct_inpatient_charges
+    description: Detailed inpatient fact table for provider, DRG, and state level semantic analysis.
+    semantic_model:
+      enabled: true
+      name: inpatient_charges_detail
+    agg_time_dimension: metric_year
+    columns:
+      - name: inpatient_fact_key
+        description: Surrogate primary key for inpatient fact.
+        entity:
+          name: inpatient_fact
+          type: primary
+        tests:
+          - not_null
+          - unique
+
+      - name: provider_key
+        description: Foreign key to provider dimension.
+        entity:
+          name: provider
+          type: foreign
+
+      - name: drg_key
+        description: Foreign key to DRG dimension.
+        entity:
+          name: drg
+          type: foreign
+
+      - name: data_year
+        description: Source reporting year.
+        dimension:
+          type: categorical
+
+      - name: metric_year
+        description: Metric year for semantic time analysis.
+        dimension:
+          type: time
+        granularity: year
+
+      - name: total_discharges
+        description: Total inpatient discharges at fact grain.
+
+      - name: average_covered_charges
+        description: Average covered charges at fact grain.
+
+      - name: average_total_payments
+        description: Average total payments at fact grain.
+
       - name: average_medicare_payments
+        description: Average Medicare payments at fact grain.
+
+      - name: source_file
+        description: Source file lineage.
+        dimension:
+          type: categorical
+
+      - name: batch_id
+        description: Batch identifier.
+        dimension:
+          type: categorical
+
+    metrics:
+      - name: inpatient_detail_total_discharges
+        label: Inpatient Detail Total Discharges
+        description: Total inpatient discharges from detailed fact model.
+        type: simple
+        agg: sum
+        expr: total_discharges
+
+      - name: inpatient_detail_avg_covered_charges
+        label: Inpatient Detail Avg Covered Charges
+        description: Average covered charges from detailed fact model.
+        type: simple
+        agg: average
+        expr: average_covered_charges
+
+      - name: inpatient_detail_avg_total_payments
+        label: Inpatient Detail Avg Total Payments
+        description: Average total payments from detailed fact model.
+        type: simple
+        agg: average
+        expr: average_total_payments
+
+      - name: inpatient_detail_avg_medicare_payments
+        label: Inpatient Detail Avg Medicare Payments
+        description: Average Medicare payments from detailed fact model.
+        type: simple
+        agg: average
+        expr: average_medicare_payments
+
+      - name: inpatient_detail_row_count
+        label: Inpatient Detail Row Count
+        description: Count of inpatient fact rows.
+        type: simple
+        agg: count
+        expr: inpatient_fact_key
+
+  - name: fct_outpatient_charges
+    description: Detailed outpatient fact table for provider, APC, and state level semantic analysis.
+    semantic_model:
+      enabled: true
+      name: outpatient_charges_detail
+    agg_time_dimension: metric_year
+    columns:
+      - name: outpatient_fact_key
+        description: Surrogate primary key for outpatient fact.
+        entity:
+          name: outpatient_fact
+          type: primary
+        tests:
+          - not_null
+          - unique
+
+      - name: provider_key
+        description: Foreign key to provider dimension.
+        entity:
+          name: provider
+          type: foreign
+
+      - name: apc_key
+        description: Foreign key to APC dimension.
+        entity:
+          name: apc
+          type: foreign
+
+      - name: data_year
+        description: Source reporting year.
+        dimension:
+          type: categorical
+
+      - name: metric_year
+        description: Metric year for semantic time analysis.
+        dimension:
+          type: time
+        granularity: year
+
+      - name: outpatient_services
+        description: Total outpatient services at fact grain.
+
+      - name: average_estimated_submitted_charges
+        description: Average estimated submitted charges at fact grain.
+
+      - name: average_total_payments
+        description: Average total payments at fact grain.
+
+      - name: average_medicare_payments
+        description: Average Medicare payments at fact grain.
         tests:
           - not_null:
               config:
                 severity: warn
+
+      - name: source_file
+        description: Source file lineage.
+        dimension:
+          type: categorical
+
+      - name: batch_id
+        description: Batch identifier.
+        dimension:
+          type: categorical
+
+    metrics:
+      - name: outpatient_detail_total_services
+        label: Outpatient Detail Total Services
+        description: Total outpatient services from detailed fact model.
+        type: simple
+        agg: sum
+        expr: outpatient_services
+
+      - name: outpatient_detail_avg_estimated_submitted_charges
+        label: Outpatient Detail Avg Estimated Submitted Charges
+        description: Average estimated submitted charges from detailed fact model.
+        type: simple
+        agg: average
+        expr: average_estimated_submitted_charges
+
+      - name: outpatient_detail_avg_total_payments
+        label: Outpatient Detail Avg Total Payments
+        description: Average total payments from detailed fact model.
+        type: simple
+        agg: average
+        expr: average_total_payments
+
+      - name: outpatient_detail_avg_medicare_payments
+        label: Outpatient Detail Avg Medicare Payments
+        description: Average Medicare payments from detailed fact model.
+        type: simple
+        agg: average
+        expr: average_medicare_payments
+
+      - name: outpatient_detail_row_count
+        label: Outpatient Detail Row Count
+        description: Count of outpatient fact rows.
+        type: simple
+        agg: count
+        expr: outpatient_fact_key

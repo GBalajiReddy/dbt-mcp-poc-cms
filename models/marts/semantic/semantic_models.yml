@@ -27,3 +27,43 @@ metrics:
         alias: inpatient_payment
       - name: outpatient_avg_total_payments
         alias: outpatient_payment
+
+  - name: inpatient_detail_to_outpatient_detail_avg_payment_ratio
+    label: Inpatient Detail to Outpatient Detail Avg Payment Ratio
+    description: Ratio of detailed inpatient average total payments to detailed outpatient average total payments.
+    type: ratio
+    numerator: inpatient_detail_avg_total_payments
+    denominator: outpatient_detail_avg_total_payments
+
+  - name: inpatient_detail_vs_outpatient_detail_payment_gap
+    label: Inpatient Detail vs Outpatient Detail Payment Gap
+    description: Difference between detailed inpatient and detailed outpatient average total payments.
+    type: derived
+    expr: inpatient_payment - outpatient_payment
+    input_metrics:
+      - name: inpatient_detail_avg_total_payments
+        alias: inpatient_payment
+      - name: outpatient_detail_avg_total_payments
+        alias: outpatient_payment
+
+  - name: inpatient_detail_covered_vs_medicare_gap
+    label: Inpatient Detail Covered vs Medicare Gap
+    description: Difference between detailed inpatient covered charges and detailed inpatient Medicare payments.
+    type: derived
+    expr: covered - medicare
+    input_metrics:
+      - name: inpatient_detail_avg_covered_charges
+        alias: covered
+      - name: inpatient_detail_avg_medicare_payments
+        alias: medicare
+
+  - name: outpatient_detail_submitted_vs_medicare_gap
+    label: Outpatient Detail Submitted vs Medicare Gap
+    description: Difference between detailed outpatient submitted charges and detailed outpatient Medicare payments.
+    type: derived
+    expr: submitted - medicare
+    input_metrics:
+      - name: outpatient_detail_avg_estimated_submitted_charges
+        alias: submitted
+      - name: outpatient_detail_avg_medicare_payments
+        alias: medicare

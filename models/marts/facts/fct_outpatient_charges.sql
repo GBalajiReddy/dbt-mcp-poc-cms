@@ -73,6 +73,7 @@ final as (
 
         -- Grain
         s.data_year,
+        to_date(cast(s.data_year as varchar) || '-01-01') as metric_year,
 
         -- Dimension Keys
         p.provider_key,
